@@ -6,12 +6,14 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import streamlit as st
+import boto3
 from pyvis.network import Network
 from sklearn.cluster import KMeans
-from langchain_community.llms import Ollama
+from langchain_ollama.llms import OllamaLLM
+from langchain_openai import OpenAIEmbeddings, OpenAI, ChatOpenAI
 from sklearn.mixture import GaussianMixture
 import streamlit.components.v1 as components
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import Chroma
 from langchain.memory import ConversationBufferMemory
 from sklearn.metrics.pairwise import cosine_similarity
@@ -19,37 +21,57 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.document_loaders import JSONLoader
 from langchain_experimental.text_splitter import SemanticChunker
-from langchain_community.embeddings import HuggingFaceInstructEmbeddings 
+from langchain_community.embeddings import HuggingFaceInstructEmbeddings
+from langchain_aws import BedrockEmbeddings, ChatBedrock
+from dotenv import load_dotenv
+load_dotenv()
+
+session = boto3.Session(
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+)
 
 # Message classes
 class Message:
     def __init__(self, content):
         self.content = content
 
+
 class HumanMessage(Message):
     """Represents a message from the user."""
+
     pass
+
 
 class AIMessage(Message):
     """Represents a message from the AI."""
+
     pass
+
 
 @st.cache_resource
 def load_model():
-    with st.spinner("Downloading Instructor XL Embeddings Model locally....please be patient"):
-        embedding_model=HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large", model_kwargs={"device": "cuda"})
+    with st.spinner(
+        "Downloading Instructor XL Embeddings Model locally....please be patient"
+    ):
+        model = "amazon.titan-embed-text-v1"
+        embedding_model = BedrockEmbeddings(region_name=os.getenv("AWS_LOCATION"), model_id=model)
     return embedding_model
+
 
 # Class for chatting with pcap data
 class ChatWithPCAP:
     def __init__(self, json_path):
         self.embedding_model = load_model()
-        self.llm = Ollama(model=st.session_state['selected_model'], base_url="http://ollama:11434")
+        #self.llm = OllamaLLM(
+        #    model=st.session_state["selected_model"], base_url="http://ollama:11434"
+        #)
+        self.llm = self.llm = ChatBedrock(region_name=os.getenv("AWS_LOCATION"), model_id="meta.llama3-1-70b-instruct-v1:0", model_kwargs=dict(temperature=0.1))
         self.document_cluster_mapping = {}
         self.json_path = json_path
         self.conversation_history = []
         self.load_json()
-        self.split_into_chunks()        
+        self.split_into_chunks()
         self.root_node = None
         self.create_leaf_nodes()
         self.build_tree()  # This will build the tree
@@ -61,18 +83,20 @@ class ChatWithPCAP:
         self.loader = JSONLoader(
             file_path=self.json_path,
             jq_schema=".[] | ._source.layers",
-            text_content=False
+            text_content=False,
         )
         self.pages = self.loader.load_and_split()
 
     def split_into_chunks(self):
-        self.text_splitter = SemanticChunker(self.embedding_model)
-        self.docs = self.text_splitter.split_documents(self.pages)
+        with st.spinner("Splitting text into semantic chunks..."):
+            self.text_splitter = SemanticChunker(self.embedding_model)
+            self.docs = self.text_splitter.split_documents(self.pages)
 
     def create_leaf_nodes(self):
-        self.leaf_nodes = [Node(text=doc.page_content) for doc in self.docs]
-        self.embed_leaf_nodes()
-        st.write(f"Leaf nodes created. Total count: {len(self.leaf_nodes)}")
+        with st.spinner("Creating leaf nodes..."):
+            self.leaf_nodes = [Node(text=doc.page_content) for doc in self.docs]
+            self.embed_leaf_nodes()
+            st.write(f"Leaf nodes created. Total count: {len(self.leaf_nodes)}")
 
     def embed_leaf_nodes(self):
         for leaf_node in self.leaf_nodes:
@@ -82,24 +106,30 @@ class ChatWithPCAP:
                     leaf_node.embedding = embedding
                 else:
                     # Handle the case where embedding is nan or None
-                    st.write(f"Invalid embedding generated for leaf node with text: {leaf_node.text}")
+                    st.write(
+                        f"Invalid embedding generated for leaf node with text: {leaf_node.text}"
+                    )
             except Exception as e:
                 st.write(f"Error embedding leaf node: {e}")
 
     def determine_initial_clusters(self, nodes):
         # This is a simple heuristic: take the square root of the number of nodes,
         # capped at a minimum of 2 and a maximum that makes sense for your application.
-        return max(2, int(len(nodes)**0.5))
+        return max(2, int(len(nodes) ** 0.5))
 
     def cluster_nodes(self, nodes, n_clusters=2):
         st.write(f"Clustering {len(nodes)} nodes into {n_clusters} clusters...")
-        embeddings = np.array([node.embedding for node in nodes if node.embedding is not None])
+        embeddings = np.array(
+            [node.embedding for node in nodes if node.embedding is not None]
+        )
         st.write("Embeddings as of Cluster Nodes:", embeddings)
         # Check if embeddings is empty
         if embeddings.size == 0:
             # Handle the case where there are no embeddings to cluster
             # This could be logging a warning and returning the nodes as a single cluster or any other logic you see fit
-            st.write("Warning: No valid embeddings found for clustering. Returning nodes as a single cluster.")
+            st.write(
+                "Warning: No valid embeddings found for clustering. Returning nodes as a single cluster."
+            )
             return [nodes]  # Return all nodes as a single cluster to avoid crashing
 
         # Check if embeddings is not empty but a 1D array, reshape it
@@ -133,7 +163,9 @@ class ChatWithPCAP:
         return summary
 
     def recursive_cluster_summarize(self, nodes, depth=0, n_clusters=None):
-        st.write(f"Clustering and summarizing at depth {depth} with {len(nodes)} nodes...")
+        st.write(
+            f"Clustering and summarizing at depth {depth} with {len(nodes)} nodes..."
+        )
         if len(nodes) <= 1:
             self.root_node = nodes[0]  # If only one node, it is the root
             return nodes[0]  # Base case: only one node, it is the root
@@ -153,6 +185,7 @@ class ChatWithPCAP:
         return self.recursive_cluster_summarize(parent_nodes, depth + 1)
 
     def build_tree(self):
+        st.write("Building tree...")
         # Determine the number of clusters to start with
         # It could be a function of the number of leaf nodes, or a fixed number
         n_clusters = self.determine_initial_clusters(self.leaf_nodes)
@@ -182,14 +215,22 @@ class ChatWithPCAP:
         # Combine leaf texts and summaries.
         combined_texts = all_texts + all_summaries
         # Now, use all_texts to build the vectorstore with Chroma
-        
-        self.vectordb = Chroma.from_texts(texts=combined_texts, embedding=self.embedding_model)
+
+        self.vectordb = Chroma.from_texts(
+            texts=combined_texts, embedding=self.embedding_model
+        )
 
     def setup_conversation_memory(self):
-        self.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+        self.memory = ConversationBufferMemory(
+            memory_key="chat_history", return_messages=True
+        )
 
     def setup_conversation_retrieval_chain(self):
-        self.qa = ConversationalRetrievalChain.from_llm(self.llm, self.vectordb.as_retriever(search_kwargs={"k": 10}), memory=self.memory)
+        self.qa = ConversationalRetrievalChain.from_llm(
+            self.llm,
+            self.vectordb.as_retriever(search_kwargs={"k": 10}),
+            memory=self.memory,
+        )
 
     def get_optimal_clusters(self, embeddings, max_clusters=50, random_state=1234):
         if embeddings is None or len(embeddings) == 0:
@@ -239,7 +280,7 @@ class ChatWithPCAP:
             generated_text = str(response)
             st.error("Unexpected response format.")
 
-        #st.write("Response content:", generated_text)
+        # st.write("Response content:", generated_text)
 
         # Assuming the 'content' starts with "content='" and ends with "'"
         # Attempt to directly parse the JSON part, assuming no other wrapping
@@ -284,10 +325,10 @@ class ChatWithPCAP:
             json_end = response_text.rfind("]") + 1
             json_str = response_text[json_start:json_end]
             json_result = json.loads(json_str)
-            #st.write("Parsed related queries:", related_queries)
+            # st.write("Parsed related queries:", related_queries)
         except (ValueError, json.JSONDecodeError) as e:
-            logger.error("Failed to parse JSON: %s", e)
-            #st.error(f"Failed to parse JSON: {e}")
+            #logger.error("Failed to parse JSON: %s", e)
+            st.error(f"Failed to parse JSON: {e}")
             # related_queries = []
         return json_result
 
@@ -314,14 +355,9 @@ class ChatWithPCAP:
             if response:
                 st.write("Query: ", query_text)
                 st.write("Response: ", response["answer"])
-                all_results.append(
-                    {
-                        "query": query_text,
-                        "answer": response["answer"]
-                    }
-                )
+                all_results.append({"query": query_text, "answer": response["answer"]})
             else:
-                st.write("No response received for: ", query_text)        
+                st.write("No response received for: ", query_text)
 
         # After gathering all results, let's ask the LLM to synthesize a comprehensive answer
         if all_results:
@@ -347,11 +383,9 @@ class ChatWithPCAP:
 
     def update_conversation_history(self, question, response, relevant_nodes):
         # Store the question, response, and the paths through the tree that led to the response
-        self.conversation_history.append({
-            "You": question,
-            "AI": response,
-            "Nodes": relevant_nodes
-        })
+        self.conversation_history.append(
+            {"You": question, "AI": response, "Nodes": relevant_nodes}
+        )
 
     def identify_relevant_clusters(self, documents):
         """
@@ -399,10 +433,16 @@ class ChatWithPCAP:
 
         # Construct a DataFrame from the filtered documents
         # You'll need to adjust how you access the text and cluster_id based on your Document object structure
-        df = pd.DataFrame({
-            "Text": [doc.page_content for doc in filtered_docs],  # Adjust based on your document's structure
-            "Cluster": [self.document_cluster_mapping[i] for i in range(len(filtered_docs))]  # Access cluster IDs from the mapping
-        })
+        df = pd.DataFrame(
+            {
+                "Text": [
+                    doc.page_content for doc in filtered_docs
+                ],  # Adjust based on your document's structure
+                "Cluster": [
+                    self.document_cluster_mapping[i] for i in range(len(filtered_docs))
+                ],  # Access cluster IDs from the mapping
+            }
+        )
         self.clustered_texts = self.format_cluster_texts(df)
 
     def format_cluster_texts(self, df):
@@ -438,7 +478,7 @@ class ChatWithPCAP:
             node = self.root_node
         if node is not None:
             # Assuming that node.text contains the summary
-            summaries.append((' ' * (level * 2)) + node.text)
+            summaries.append((" " * (level * 2)) + node.text)
             for child in node.children:
                 self.display_summaries(child, level + 1, summaries)
         return summaries
@@ -460,6 +500,7 @@ class ChatWithPCAP:
         add_nodes_recursively(G, self.root_node)
         return G
 
+
 # Class for leaf nodes
 class Node:
     def __init__(self, text, children=None, embedding=None):
@@ -467,72 +508,87 @@ class Node:
         self.children = children if children is not None else []  # Child nodes
         self.embedding = embedding  # Embedding of the node's text
         self.cluster_label = None  # The cluster this node belongs to
-    
+
     def is_leaf(self):
         # A leaf node has no children
         return len(self.children) == 0
-    
+
+
 # Function to convert pcap to JSON
 def pcap_to_json(pcap_path, json_path):
-    command = f'tshark -nlr {pcap_path} -T json > {json_path}'
+    command = f"tshark -nlr {pcap_path} -T json > {json_path}"
     subprocess.run(command, shell=True)
 
+
 def get_ollama_models(base_url):
-    try:       
+    try:
         response = requests.get(f"{base_url}api/tags")  # Corrected endpoint
         response.raise_for_status()
         models_data = response.json()
-        
+
         # Extract just the model names for the dropdown
-        models = [model['name'] for model in models_data.get('models', [])]
+        models = [model["name"] for model in models_data.get("models", [])]
         return models
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to get models from Ollama: {e}")
         return []
 
+
 # Streamlit UI for uploading and converting pcap file
 def upload_and_convert_pcap():
-    st.title('Packet Raptor - Chat with Packet Captures as a Tree')
+    st.title("Packet Raptor - Chat with Packet Captures as a Tree")
     uploaded_file = st.file_uploader("Choose a PCAP file", type="pcap")
     if uploaded_file:
-        if not os.path.exists('temp'):
-            os.makedirs('temp')
+        if not os.path.exists("temp"):
+            os.makedirs("temp")
         pcap_path = os.path.join("temp", uploaded_file.name)
-        json_path = pcap_path + ".json"
+        json_path = pcap_path.split(".")[0] + ".json"
         with open(pcap_path, "wb") as f:
             f.write(uploaded_file.getvalue())
         pcap_to_json(pcap_path, json_path)
-        st.session_state['json_path'] = json_path
+        st.session_state["json_path"] = json_path
         st.success("PCAP file uploaded and converted to JSON.")
-        
+
         # Fetch and display the models in a select box
-        models = get_ollama_models("http://ollama:11434/")  # Make sure to use the correct base URL
+        models = get_ollama_models(
+            "http://ollama:11434/"
+        )  # Make sure to use the correct base URL
         if models:
             selected_model = st.selectbox("Select Model", models)
-            st.session_state['selected_model'] = selected_model
-            
+            st.session_state["selected_model"] = selected_model
+
             if st.button("Proceed to Chat"):
-                st.session_state['page'] = 2               
+                st.session_state["page"] = 2
+
 
 # Streamlit UI for chat interface
 def chat_interface():
-    st.title('Packet Raptor - Chat with Packet Captures as a Tree')
-    json_path = st.session_state.get('json_path')
+    st.title("Packet Raptor - Chat with Packet Captures as a Tree")
+    json_path = st.session_state.get("json_path")
     if not json_path or not os.path.exists(json_path):
-        st.error("PCAP file missing or not converted. Please go back and upload a PCAP file.")
+        st.error(
+            "PCAP file missing or not converted. Please go back and upload a PCAP file."
+        )
         return
 
-    if 'chat_instance' not in st.session_state:
-        st.session_state['chat_instance'] = ChatWithPCAP(json_path=json_path)
+    if "chat_instance" not in st.session_state:
+        st.session_state["chat_instance"] = ChatWithPCAP(json_path=json_path)
 
     # Visualize the tree
-    if st.session_state['chat_instance'].root_node:
+    if st.session_state["chat_instance"].root_node:
         st.subheader("RAPTOR Tree Visualization")
-        G = st.session_state['chat_instance'].create_tree_graph()
-        nt = Network('800px', '800px', notebook=True, directed=True)
+        G = st.session_state["chat_instance"].create_tree_graph()
+        nt = Network("800px", "800px", notebook=True, directed=True)
         nt.from_nx(G)
-        nt.hrepulsion(node_distance=120, central_gravity=0.0, spring_length=100, spring_strength=0.01, damping=0.09)
-        nt.set_options("""
+        nt.hrepulsion(
+            node_distance=120,
+            central_gravity=0.0,
+            spring_length=100,
+            spring_strength=0.01,
+            damping=0.09,
+        )
+        nt.set_options(
+            """
             var options = {
               "nodes": {
                 "scaling": {
@@ -556,21 +612,22 @@ def chat_interface():
                 "solver": "hierarchicalRepulsion"
               }
             }
-            """)
-        nt.show('tree.html')
-        HtmlFile = open('tree.html', 'r', encoding='utf-8')
-        source_code = HtmlFile.read() 
+            """
+        )
+        nt.show("tree.html")
+        HtmlFile = open("tree.html", "r", encoding="utf-8")
+        source_code = HtmlFile.read()
         components.html(source_code, height=800, width=1000)
 
     user_input = st.text_input("Ask a question about the PCAP data:")
     if user_input and st.button("Send"):
-        with st.spinner('Thinking...'):
-            response = st.session_state['chat_instance'].chat(user_input)
+        with st.spinner("Thinking..."):
+            response = st.session_state["chat_instance"].chat(user_input)
 
             # New: Display the automated AI analysis (summaries) before asking a question
-            if st.session_state['chat_instance'].root_node:
+            if st.session_state["chat_instance"].root_node:
                 st.subheader("Automated AI Analysis")
-                summaries = st.session_state['chat_instance'].display_summaries()
+                summaries = st.session_state["chat_instance"].display_summaries()
                 for summary in summaries:
                     st.markdown(f"* {summary}")
             # Display the top result's answer as markdown for better readability
@@ -578,7 +635,7 @@ def chat_interface():
                 st.markdown("**Sythensized Composite Answer:**")
                 # Assuming top_result is a set
                 if isinstance(response, set):
-                # Convert each element in the set to a string and join them with a line break
+                    # Convert each element in the set to a string and join them with a line break
                     formatted_string = "\n".join(str(element) for element in response)
                 st.markdown(f"> {formatted_string}")
             else:
@@ -592,11 +649,12 @@ def chat_interface():
                 # Access the 'content' attribute of the message to display its text
                 st.markdown(f"{prefix}{message.content}")
 
-if __name__ == "__main__":
-    if 'page' not in st.session_state:
-        st.session_state['page'] = 1
 
-    if st.session_state['page'] == 1:
+if __name__ == "__main__":
+    if "page" not in st.session_state:
+        st.session_state["page"] = 1
+
+    if st.session_state["page"] == 1:
         upload_and_convert_pcap()
-    elif st.session_state['page'] == 2:
+    elif st.session_state["page"] == 2:
         chat_interface()
