@@ -366,8 +366,8 @@ class ChatWithPCAP:
 
             if synthesized_response:
                 # Assuming synthesized_response is an AIMessage object with a 'content' attribute
-                st.write(synthesized_response)
-                final_answer = synthesized_response
+                st.write(synthesized_response.content)
+                final_answer = synthesized_response.content
             else:
                 final_answer = "Unable to synthesize a response."
 
@@ -571,13 +571,12 @@ def chat_interface():
         )
         return
 
-    if "chat_instance" not in st.session_state:
-        st.session_state["chat_instance"] = ChatWithPCAP(json_path=json_path)
+    bot = ChatWithPCAP(json_path=json_path)
 
     # Visualize the tree
-    if st.session_state["chat_instance"].root_node:
+    if bot.root_node:
         st.subheader("RAPTOR Tree Visualization")
-        G = st.session_state["chat_instance"].create_tree_graph()
+        G = bot.create_tree_graph()
         nt = Network("800px", "800px", notebook=True, directed=True)
         nt.from_nx(G)
         nt.hrepulsion(
@@ -622,12 +621,12 @@ def chat_interface():
     user_input = st.text_input("Ask a question about the PCAP data:")
     if user_input and st.button("Send"):
         with st.spinner("Thinking..."):
-            response = st.session_state["chat_instance"].chat(user_input)
+            response = bot.chat(user_input)
 
             # New: Display the automated AI analysis (summaries) before asking a question
-            if st.session_state["chat_instance"].root_node:
+            if bot.root_node:
                 st.subheader("Automated AI Analysis")
-                summaries = st.session_state["chat_instance"].display_summaries()
+                summaries = bot.display_summaries()
                 for summary in summaries:
                     st.markdown(f"* {summary}")
             # Display the top result's answer as markdown for better readability
@@ -643,7 +642,7 @@ def chat_interface():
 
             # Display chat history
             st.markdown("**Chat History:**")
-            for message in st.session_state["chat_instance"].conversation_history:
+            for message in bot.conversation_history:
                 # Check the type of message and set the appropriate prefix
                 prefix = "*User:* " if isinstance(message, HumanMessage) else "*AI:* "
                 # Access the 'content' attribute of the message to display its text

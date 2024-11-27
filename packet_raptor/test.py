@@ -25,13 +25,14 @@ from langchain_aws import BedrockEmbeddings, BedrockLLM, ChatBedrock
 from dotenv import load_dotenv
 load_dotenv()
 
+
 session = boto3.Session(
     aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
     aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
 )
 
 session_state={}
-HOSTNAME="localhost" # or ollama
+HOSTNAME = "localhost"
 
 # Message classes
 class Message:
@@ -94,7 +95,6 @@ class ChatWithPCAP:
     def create_leaf_nodes(self):
         print("Creating leaf nodes...")
         self.leaf_nodes = [Node(text=doc.page_content) for doc in self.docs]
-        print(f"Leaf nodes created-before. Total count: {len(self.leaf_nodes)}")
         self.embed_leaf_nodes()
         print(f"Leaf nodes created. Total count: {len(self.leaf_nodes)}")
 
@@ -366,8 +366,8 @@ class ChatWithPCAP:
 
             if synthesized_response:
                 # Assuming synthesized_response is an AIMessage object with a 'content' attribute
-                print(synthesized_response)
-                final_answer = synthesized_response
+                print("OOOOOO:",synthesized_response.content)
+                final_answer = synthesized_response.content
             else:
                 final_answer = "Unable to synthesize a response."
 
@@ -563,7 +563,7 @@ def get_ollama_models(base_url):
 # Streamlit UI for uploading and converting pcap file
 def upload_and_convert_pcap():
     print("Packet Raptor - Chat with Packet Captures as a Tree")
-    pcap_path = "/home/ash/github/packet_raptor/packet_raptor/MicrosoftNTP.pcap"
+    pcap_path = "/home/ash/github/packet_raptor/packet_raptor/rpl-dio-mc-nsa-optional-tlv-dissector-sample.pcap"
     json_path = pcap_path.split('.')[0] + ".json"
     json_new = pcap_path.split('.')[0] + "_new.json"
     pcap_to_json(pcap_path, json_path)
@@ -587,13 +587,12 @@ def upload_and_convert_pcap():
 def chat_interface():
     print("Packet Raptor - Chat with Packet Captures as a Tree")
     #json is loaded here
-    json_path = session_state["json_new"]
+    json_path = session_state["json_path"]
     if not json_path or not os.path.exists(json_path):
         print(
             "PCAP file missing or not converted. Please go back and upload a PCAP file."
         )
         return
-
 
     if "chat_instance" not in session_state:
         session_state["chat_instance"] = ChatWithPCAP(json_path=json_path)

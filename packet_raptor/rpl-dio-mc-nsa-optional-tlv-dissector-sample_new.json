@@ -1,0 +1,377 @@
+[
+  {
+    "_index": "packets-2018-07-24",
+    "_type": "doc",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.encap_type": "104",
+          "frame.time": "Jul 24, 2018 21:07:33.672120000 IST",
+          "frame.time_utc": "Jul 24, 2018 15:37:33.672120000 UTC",
+          "frame.time_epoch": "1532446653.672120000",
+          "frame.offset_shift": "0.000000000",
+          "frame.time_delta": "0.000000000",
+          "frame.time_delta_displayed": "0.000000000",
+          "frame.time_relative": "0.000000000",
+          "frame.number": "1",
+          "frame.len": "105",
+          "frame.cap_len": "105",
+          "frame.marked": "0",
+          "frame.ignored": "0",
+          "frame.protocols": "wpan:6lowpan:ipv6:icmpv6"
+        },
+        "wpan": {
+          "wpan.frame_length": "103",
+          "wpan.fcf": "0xec21",
+          "wpan.fcf_tree": {
+            "wpan.frame_type": "0x0001",
+            "wpan.security": "0",
+            "wpan.pending": "0",
+            "wpan.ack_request": "1",
+            "wpan.pan_id_compression": "0",
+            "wpan.fcf.reserved": "0",
+            "wpan.seqno_suppression": "0",
+            "wpan.ie_present": "0",
+            "wpan.dst_addr_mode": "0x0003",
+            "wpan.version": "2",
+            "wpan.src_addr_mode": "0x0003"
+          },
+          "wpan.seq_no": "26",
+          "wpan.dst_pan": "0xabcd",
+          "wpan.dst64": "00:00:00:00:00:00:00:00",
+          "wpan.addr64": "00:05:00:05:00:05:00:05",
+          "wpan.src64": "00:05:00:05:00:05:00:05",
+          "wpan.fcs": "0x4304",
+          "wpan.fcs_ok": "1"
+        },
+        "6lowpan": {
+          "IPHC Header": {
+            "6lowpan.pattern": "0x03",
+            "6lowpan.iphc.tf": "0x0003",
+            "6lowpan.iphc.nh": "0",
+            "6lowpan.iphc.hlim": "0x0002",
+            "6lowpan.iphc.cid": "0",
+            "6lowpan.iphc.sac": "0",
+            "6lowpan.iphc.sam": "0x0003",
+            "6lowpan.iphc.m": "1",
+            "6lowpan.iphc.dac": "0",
+            "6lowpan.iphc.dam": "0x0003",
+            "6lowpan.iphc.sctx.prefix": "fe80::",
+            "6lowpan.iphc.dctx.prefix": "fe80::"
+          },
+          "6lowpan.next": "0x3a",
+          "6lowpan.src": "fe80::205:5:5:5",
+          "6lowpan.dst": "ff02::1a"
+        },
+        "ipv6": {
+          "ipv6.version": "6",
+          "ip.version": "6",
+          "ipv6.tclass": "0x00000000",
+          "ipv6.tclass_tree": {
+            "ipv6.tclass.dscp": "0",
+            "ipv6.tclass.ecn": "0"
+          },
+          "ipv6.flow": "0x000000",
+          "ipv6.plen": "78",
+          "ipv6.nxt": "58",
+          "ipv6.hlim": "64",
+          "ipv6.src": "fe80::205:5:5:5",
+          "ipv6.addr": "ff02::1a",
+          "ipv6.src_host": "fe80::205:5:5:5",
+          "ipv6.host": "ff02::1a",
+          "ipv6.dst": "ff02::1a",
+          "ipv6.dst_host": "ff02::1a"
+        },
+        "icmpv6": {
+          "icmpv6.type": "155",
+          "icmpv6.code": "1",
+          "icmpv6.checksum": "0x0d75",
+          "icmpv6.checksum.status": "1",
+          "icmpv6.rpl.dio.instance": "30",
+          "icmpv6.rpl.dio.version": "241",
+          "icmpv6.rpl.dio.rank": "1152",
+          "icmpv6.rpl.dio.flag": "0x00",
+          "icmpv6.rpl.dio.flag_tree": {
+            "icmpv6.rpl.dio.flag.g": "0",
+            "icmpv6.rpl.dio.flag.0": "0",
+            "icmpv6.rpl.dio.flag.mop": "0x01",
+            "icmpv6.rpl.dio.flag.preference": "0"
+          },
+          "icmpv6.rpl.dio.dtsn": "240",
+          "icmpv6.reserved": "00",
+          "icmpv6.rpl.dio.dagid": "fd00::218:18:18:18",
+          "icmpv6.opt": {
+            "icmpv6.rpl.opt.type": "4",
+            "icmpv6.rpl.opt.length": "14",
+            "icmpv6.rpl.opt.config.flag": "0x00",
+            "icmpv6.rpl.opt.config.flag_tree": {
+              "icmpv6.rpl.opt.config.reserved": "0",
+              "icmpv6.rpl.opt.config.auth": "0",
+              "icmpv6.rpl.opt.config.pcs": "0"
+            },
+            "icmpv6.rpl.opt.config.interval_double": "8",
+            "icmpv6.rpl.opt.config.interval_min": "12",
+            "icmpv6.rpl.opt.config.redundancy": "10",
+            "icmpv6.rpl.opt.config.max_rank_inc": "896",
+            "icmpv6.rpl.opt.config.min_hop_rank_inc": "128",
+            "icmpv6.rpl.opt.config.ocp": "1",
+            "icmpv6.rpl.opt.config.rsv": "0",
+            "icmpv6.rpl.opt.config.def_lifetime": "30",
+            "icmpv6.rpl.opt.config.lifetime_unit": "60"
+          }
+        }
+      }
+    }
+  },
+  {
+    "_index": "packets-2018-07-24",
+    "_type": "doc",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.encap_type": "104",
+          "frame.time": "Jul 24, 2018 21:07:59.082120000 IST",
+          "frame.time_utc": "Jul 24, 2018 15:37:59.082120000 UTC",
+          "frame.time_epoch": "1532446679.082120000",
+          "frame.offset_shift": "0.000000000",
+          "frame.time_delta": "25.410000000",
+          "frame.time_delta_displayed": "25.410000000",
+          "frame.time_relative": "25.410000000",
+          "frame.number": "2",
+          "frame.len": "97",
+          "frame.cap_len": "97",
+          "frame.marked": "0",
+          "frame.ignored": "0",
+          "frame.protocols": "wpan:6lowpan:ipv6:icmpv6"
+        },
+        "wpan": {
+          "wpan.frame_length": "95",
+          "wpan.fcf": "0xec21",
+          "wpan.fcf_tree": {
+            "wpan.frame_type": "0x0001",
+            "wpan.security": "0",
+            "wpan.pending": "0",
+            "wpan.ack_request": "1",
+            "wpan.pan_id_compression": "0",
+            "wpan.fcf.reserved": "0",
+            "wpan.seqno_suppression": "0",
+            "wpan.ie_present": "0",
+            "wpan.dst_addr_mode": "0x0003",
+            "wpan.version": "2",
+            "wpan.src_addr_mode": "0x0003"
+          },
+          "wpan.seq_no": "19",
+          "wpan.dst_pan": "0xabcd",
+          "wpan.dst64": "00:00:00:00:00:00:00:00",
+          "wpan.addr64": "00:14:00:14:00:14:00:14",
+          "wpan.src64": "00:14:00:14:00:14:00:14",
+          "wpan.fcs": "0x044c",
+          "wpan.fcs_ok": "1"
+        },
+        "6lowpan": {
+          "IPHC Header": {
+            "6lowpan.pattern": "0x03",
+            "6lowpan.iphc.tf": "0x0003",
+            "6lowpan.iphc.nh": "0",
+            "6lowpan.iphc.hlim": "0x0002",
+            "6lowpan.iphc.cid": "0",
+            "6lowpan.iphc.sac": "0",
+            "6lowpan.iphc.sam": "0x0003",
+            "6lowpan.iphc.m": "1",
+            "6lowpan.iphc.dac": "0",
+            "6lowpan.iphc.dam": "0x0003",
+            "6lowpan.iphc.sctx.prefix": "fe80::",
+            "6lowpan.iphc.dctx.prefix": "fe80::"
+          },
+          "6lowpan.next": "0x3a",
+          "6lowpan.src": "fe80::214:14:14:14",
+          "6lowpan.dst": "ff02::1a"
+        },
+        "ipv6": {
+          "ipv6.version": "6",
+          "ip.version": "6",
+          "ipv6.tclass": "0x00000000",
+          "ipv6.tclass_tree": {
+            "ipv6.tclass.dscp": "0",
+            "ipv6.tclass.ecn": "0"
+          },
+          "ipv6.flow": "0x000000",
+          "ipv6.plen": "70",
+          "ipv6.nxt": "58",
+          "ipv6.hlim": "64",
+          "ipv6.src": "fe80::214:14:14:14",
+          "ipv6.addr": "ff02::1a",
+          "ipv6.src_host": "fe80::214:14:14:14",
+          "ipv6.host": "ff02::1a",
+          "ipv6.dst": "ff02::1a",
+          "ipv6.dst_host": "ff02::1a"
+        },
+        "icmpv6": {
+          "icmpv6.type": "155",
+          "icmpv6.code": "1",
+          "icmpv6.checksum": "0x1545",
+          "icmpv6.checksum.status": "1",
+          "icmpv6.rpl.dio.instance": "30",
+          "icmpv6.rpl.dio.version": "241",
+          "icmpv6.rpl.dio.rank": "384",
+          "icmpv6.rpl.dio.flag": "0x00",
+          "icmpv6.rpl.dio.flag_tree": {
+            "icmpv6.rpl.dio.flag.g": "0",
+            "icmpv6.rpl.dio.flag.0": "0",
+            "icmpv6.rpl.dio.flag.mop": "0x01",
+            "icmpv6.rpl.dio.flag.preference": "0"
+          },
+          "icmpv6.rpl.dio.dtsn": "240",
+          "icmpv6.reserved": "00",
+          "icmpv6.rpl.dio.dagid": "fd00::218:18:18:18",
+          "icmpv6.opt": {
+            "icmpv6.rpl.opt.type": "4",
+            "icmpv6.rpl.opt.length": "14",
+            "icmpv6.rpl.opt.config.flag": "0x00",
+            "icmpv6.rpl.opt.config.flag_tree": {
+              "icmpv6.rpl.opt.config.reserved": "0",
+              "icmpv6.rpl.opt.config.auth": "0",
+              "icmpv6.rpl.opt.config.pcs": "0"
+            },
+            "icmpv6.rpl.opt.config.interval_double": "8",
+            "icmpv6.rpl.opt.config.interval_min": "12",
+            "icmpv6.rpl.opt.config.redundancy": "10",
+            "icmpv6.rpl.opt.config.max_rank_inc": "896",
+            "icmpv6.rpl.opt.config.min_hop_rank_inc": "128",
+            "icmpv6.rpl.opt.config.ocp": "1",
+            "icmpv6.rpl.opt.config.rsv": "0",
+            "icmpv6.rpl.opt.config.def_lifetime": "30",
+            "icmpv6.rpl.opt.config.lifetime_unit": "60"
+          }
+        }
+      }
+    }
+  },
+  {
+    "_index": "packets-2018-07-24",
+    "_type": "doc",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.encap_type": "104",
+          "frame.time": "Jul 24, 2018 21:10:52.112120000 IST",
+          "frame.time_utc": "Jul 24, 2018 15:40:52.112120000 UTC",
+          "frame.time_epoch": "1532446852.112120000",
+          "frame.offset_shift": "0.000000000",
+          "frame.time_delta": "173.030000000",
+          "frame.time_delta_displayed": "173.030000000",
+          "frame.time_relative": "198.440000000",
+          "frame.number": "3",
+          "frame.len": "113",
+          "frame.cap_len": "113",
+          "frame.marked": "0",
+          "frame.ignored": "0",
+          "frame.protocols": "wpan:6lowpan:ipv6:icmpv6"
+        },
+        "wpan": {
+          "wpan.frame_length": "111",
+          "wpan.fcf": "0xec21",
+          "wpan.fcf_tree": {
+            "wpan.frame_type": "0x0001",
+            "wpan.security": "0",
+            "wpan.pending": "0",
+            "wpan.ack_request": "1",
+            "wpan.pan_id_compression": "0",
+            "wpan.fcf.reserved": "0",
+            "wpan.seqno_suppression": "0",
+            "wpan.ie_present": "0",
+            "wpan.dst_addr_mode": "0x0003",
+            "wpan.version": "2",
+            "wpan.src_addr_mode": "0x0003"
+          },
+          "wpan.seq_no": "46",
+          "wpan.dst_pan": "0xabcd",
+          "wpan.dst64": "00:00:00:00:00:00:00:00",
+          "wpan.addr64": "00:0a:00:0a:00:0a:00:0a",
+          "wpan.src64": "00:0a:00:0a:00:0a:00:0a",
+          "wpan.fcs": "0x98b5",
+          "wpan.fcs_ok": "1"
+        },
+        "6lowpan": {
+          "IPHC Header": {
+            "6lowpan.pattern": "0x03",
+            "6lowpan.iphc.tf": "0x0003",
+            "6lowpan.iphc.nh": "0",
+            "6lowpan.iphc.hlim": "0x0002",
+            "6lowpan.iphc.cid": "0",
+            "6lowpan.iphc.sac": "0",
+            "6lowpan.iphc.sam": "0x0003",
+            "6lowpan.iphc.m": "1",
+            "6lowpan.iphc.dac": "0",
+            "6lowpan.iphc.dam": "0x0003",
+            "6lowpan.iphc.sctx.prefix": "fe80::",
+            "6lowpan.iphc.dctx.prefix": "fe80::"
+          },
+          "6lowpan.next": "0x3a",
+          "6lowpan.src": "fe80::20a:a:a:a",
+          "6lowpan.dst": "ff02::1a"
+        },
+        "ipv6": {
+          "ipv6.version": "6",
+          "ip.version": "6",
+          "ipv6.tclass": "0x00000000",
+          "ipv6.tclass_tree": {
+            "ipv6.tclass.dscp": "0",
+            "ipv6.tclass.ecn": "0"
+          },
+          "ipv6.flow": "0x000000",
+          "ipv6.plen": "86",
+          "ipv6.nxt": "58",
+          "ipv6.hlim": "64",
+          "ipv6.src": "fe80::20a:a:a:a",
+          "ipv6.addr": "ff02::1a",
+          "ipv6.src_host": "fe80::20a:a:a:a",
+          "ipv6.host": "ff02::1a",
+          "ipv6.dst": "ff02::1a",
+          "ipv6.dst_host": "ff02::1a"
+        },
+        "icmpv6": {
+          "icmpv6.type": "155",
+          "icmpv6.code": "1",
+          "icmpv6.checksum": "0x0dd1",
+          "icmpv6.checksum.status": "1",
+          "icmpv6.rpl.dio.instance": "30",
+          "icmpv6.rpl.dio.version": "241",
+          "icmpv6.rpl.dio.rank": "768",
+          "icmpv6.rpl.dio.flag": "0x00",
+          "icmpv6.rpl.dio.flag_tree": {
+            "icmpv6.rpl.dio.flag.g": "0",
+            "icmpv6.rpl.dio.flag.0": "0",
+            "icmpv6.rpl.dio.flag.mop": "0x01",
+            "icmpv6.rpl.dio.flag.preference": "0"
+          },
+          "icmpv6.rpl.dio.dtsn": "240",
+          "icmpv6.reserved": "00",
+          "icmpv6.rpl.dio.dagid": "fd00::218:18:18:18",
+          "icmpv6.opt": {
+            "icmpv6.rpl.opt.type": "4",
+            "icmpv6.rpl.opt.length": "14",
+            "icmpv6.rpl.opt.config.flag": "0x00",
+            "icmpv6.rpl.opt.config.flag_tree": {
+              "icmpv6.rpl.opt.config.reserved": "0",
+              "icmpv6.rpl.opt.config.auth": "0",
+              "icmpv6.rpl.opt.config.pcs": "0"
+            },
+            "icmpv6.rpl.opt.config.interval_double": "8",
+            "icmpv6.rpl.opt.config.interval_min": "12",
+            "icmpv6.rpl.opt.config.redundancy": "10",
+            "icmpv6.rpl.opt.config.max_rank_inc": "896",
+            "icmpv6.rpl.opt.config.min_hop_rank_inc": "128",
+            "icmpv6.rpl.opt.config.ocp": "1",
+            "icmpv6.rpl.opt.config.rsv": "0",
+            "icmpv6.rpl.opt.config.def_lifetime": "30",
+            "icmpv6.rpl.opt.config.lifetime_unit": "60"
+          }
+        }
+      }
+    }
+  }
+]
